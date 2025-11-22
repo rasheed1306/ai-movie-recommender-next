@@ -74,7 +74,7 @@ export default function JoinPartyForm() {
                 placeholder="Your name"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
-                className="h-12 bg-background/50 border-border"
+                className="h-12 bg-background/50 border-border font-mono"
               />
               <p className="text-xs text-muted">
                 Let everyone know you've arrived
