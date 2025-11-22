@@ -30,8 +30,7 @@ export function PartyCreatedContent() {
   };
 
   const handleStartQuiz = () => {
-    // TODO: Navigate to quiz page
-    console.log("Starting quiz...");
+    router.push("/quiz");
   };
 
   return (
