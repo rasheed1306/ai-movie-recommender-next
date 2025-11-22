@@ -84,8 +84,8 @@ export function Quiz() {
 
   const handleFinish = () => {
     console.log("Quiz finished, answers:", answers);
-    // TODO: Navigate to results page
-    router.push("/"); // Placeholder navigation
+    // Navigate to results page
+    router.push("/results");
   };
 
   return (
