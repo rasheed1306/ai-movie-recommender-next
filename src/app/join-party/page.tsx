@@ -52,10 +52,10 @@ export default function JoinPartyForm() {
               </Label>
               <Input
                 id="partyCode"
-                placeholder="e.g., ABC123"
+                placeholder="e.g., ABC123 🔑"
                 value={partyCode}
                 onChange={(e) => setPartyCode(e.target.value.toUpperCase())}
-                className="h-12 bg-background/50 border-border font-mono"
+                className="h-12 bg-background/50 border-border"
                 maxLength={6}
               />
               <p className="text-xs text-muted">Ask your host for the code</p>
@@ -71,10 +71,10 @@ export default function JoinPartyForm() {
               </Label>
               <Input
                 id="userName"
-                placeholder="Your name"
+                placeholder="Your name ✨"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
-                className="h-12 bg-background/50 border-border font-mono"
+                className="h-12 bg-background/50 border-border"
               />
               <p className="text-xs text-muted">
                 Let everyone know you've arrived
