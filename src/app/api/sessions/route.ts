@@ -24,16 +24,25 @@ export async function POST(req: Request) {
   );
 
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    console.log("Starting session creation...");
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    console.log("User fetched:", user);
 
     if (!user) {
+      console.log("No user found");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { partyName, userName } = await req.json();
+    console.log("Request data:", { partyName, userName });
 
     if (!partyName || !userName) {
-      return NextResponse.json({ error: "Missing partyName or userName" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing partyName or userName" },
+        { status: 400 }
+      );
     }
 
     const partyCode = generatePartyCode();
@@ -49,10 +58,14 @@ export async function POST(req: Request) {
       })
       .select()
       .single();
+    console.log("Session insert result:", sessionData, sessionError);
 
     if (sessionError || !sessionData) {
       console.error("Session creation error:", sessionError);
-      return NextResponse.json({ error: "Failed to create session" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to create session" },
+        { status: 500 }
+      );
     }
 
     // Add the host to the session_users table
@@ -61,17 +74,24 @@ export async function POST(req: Request) {
       user_id: user.id,
       user_name: userName,
     });
+    console.log("User insert result:", userError); // Add this after insert
 
     if (userError) {
       console.error("Session user creation error:", userError);
       // Optional: Attempt to clean up the created session if user insert fails
       await supabase.from("sessions").delete().eq("id", sessionData.id);
-      return NextResponse.json({ error: "Failed to add host to session" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Failed to add host to session" },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ partyCode: sessionData.party_code });
   } catch (e) {
     console.error("Unexpected error:", e);
-    return NextResponse.json({ error: "An unexpected error occurred" }, { status: 500 });
+    return NextResponse.json(
+      { error: "An unexpected error occurred" },
+      { status: 500 }
+    );
   }
 }
