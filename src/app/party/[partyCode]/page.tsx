@@ -9,30 +9,40 @@ type Props = {
 };
 
 async function getSession(partyCode: string) {
-  const cookieStore = cookies();
-  const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-      },
-    }
-  );
-
-  const { data, error } = await supabase
-    .from("sessions")
-    .select(`*, session_users(user_name, is_done)`)
-    .eq("party_code", partyCode.toUpperCase())
-    .single();
-
-  if (error || !data) {
+  if (!partyCode) {
+    console.error("Invalid partyCode:", partyCode);
     return null;
   }
 
-  return data;
-}
+  try {
+    const cookieStore = await cookies();
+    const supabase = createServerClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll: () => cookieStore.getAll(),
+        },
+      }
+    );
 
+    const { data, error } = await supabase
+      .from("sessions")
+      .select(`*, session_users(user_name, is_done)`)
+      .eq("party_code", partyCode.toUpperCase())
+      .single();
+
+    if (error) {
+      console.error("Supabase error:", error);
+      return null;
+    }
+
+    return data;
+  } catch (err) {
+    console.error("Error fetching session:", err);
+    return null;
+  }
+}
 export async function generateMetadata({ params }: Props) {
   const session = await getSession(params.partyCode);
   const partyName = session?.name || "MovieMatch Party";
