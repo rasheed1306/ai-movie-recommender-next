@@ -44,19 +44,28 @@ async function getSession(partyCode: string) {
   }
 }
 export async function generateMetadata({ params }: Props) {
-  const session = await getSession(params.partyCode);
+  const resolvedParams = await params; 
+  const session = await getSession(resolvedParams.partyCode);
   const partyName = session?.name || "MovieMatch Party";
   return {
     title: `Join ${partyName} - MovieMatch`,
-    description: `You've been invited to a watch party! Join now with code ${params.partyCode}.`,
+    description: `You've been invited to a watch party! Join now with code ${resolvedParams.partyCode}.`,
   };
 }
 
 export default async function PartyPage({ params }: Props) {
-  const session = await getSession(params.partyCode);
+  const resolvedParams = await params;
+  if (!resolvedParams?.partyCode) {
+    console.error("Missing partyCode parameter");
+    notFound();
+    return null; // Add explicit return
+  }
+
+  const session = await getSession(resolvedParams.partyCode);
 
   if (!session) {
     notFound();
+    return null; // Add explicit return
   }
 
   return <PartyLobby initialSession={session} />;
