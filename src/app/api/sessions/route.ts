@@ -24,7 +24,8 @@ export async function POST(req: Request) {
   );
 
   try {
-    console.log("Starting session creation...");
+    // console.log("Starting session creation...");
+    // Get authenticated user
     const {
       data: { user },
     } = await supabase.auth.getUser();
