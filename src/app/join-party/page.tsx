@@ -12,12 +12,41 @@ export default function JoinPartyForm() {
   const router = useRouter();
   const [partyCode, setPartyCode] = useState("");
   const [userName, setUserName] = useState("");
-  const [isWaiting, setIsWaiting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isJoining, setIsJoining] = useState(false);
 
-  const handleJoinParty = () => {
-    // TODO: Implement party joining logic
-    console.log("Joining party:", { partyCode, userName });
-    setIsWaiting(true);
+  const handleJoinParty = async () => {
+    if (!partyCode.trim() || !userName.trim()) return;
+    setIsJoining(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/join-party", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ partyCode, userName }),
+      });
+
+      if (!response.ok) {
+        // Try to parse the error message, but have a fallback.
+        let errorMessage =
+          "Hmm, that party code doesn't look right. Please try again! 🤔";
+        try {
+          const { error } = await response.json();
+          if (error) errorMessage = error;
+        } catch (e) {
+          // The response was not JSON, so we'll stick with the default error.
+          console.error("Could not parse error response as JSON:", e);
+        }
+        throw new Error(errorMessage);
+      }
+
+      // On success, redirect to the waiting page
+      router.push(`/join-party/${partyCode}/waiting`);
+    } catch (err: any) {
+      setError(err.message);
+      setIsJoining(false);
+    }
   };
 
   return (
@@ -81,6 +110,12 @@ export default function JoinPartyForm() {
               </p>
             </div>
 
+            {error && (
+              <p className="text-sm font-medium text-destructive text-center">
+                {error}
+              </p>
+            )}
+
             {/* Buttons */}
             <div className="flex gap-3 pt-4">
               <Button
@@ -93,18 +128,15 @@ export default function JoinPartyForm() {
               </Button>
               <Button
                 onClick={handleJoinParty}
-                disabled={!partyCode.trim() || !userName.trim()}
+                disabled={!partyCode.trim() || !userName.trim() || isJoining}
                 className="flex-1 h-12 bg-primary text-primary-foreground hover:bg-primary/90"
               >
-                Join Party
+                {isJoining ? "Joining..." : "Join Party"}
               </Button>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Waiting for Host Modal */}
-      <WaitingForHost open={isWaiting} onClose={() => setIsWaiting(false)} />
     </div>
   );
 }

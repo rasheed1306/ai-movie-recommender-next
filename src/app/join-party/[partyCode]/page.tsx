@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { createClient } from "@/integrations/supabase/client";
 
@@ -9,12 +9,13 @@ type Props = {
   params: { partyCode: string };
 };
 
-export default function JoinPartyPage({ params }: Props) {
+export default function JoinPartyPage({ params: serverParams }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const params = useParams();
   const { session } = useAuth();
   const [error, setError] = useState<string | null>(null);
-  const partyCode = params.partyCode.toUpperCase();
+  const partyCode = (params.partyCode as string).toUpperCase();
   const userName = searchParams.get("userName");
 
   useEffect(() => {
