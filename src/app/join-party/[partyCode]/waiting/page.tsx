@@ -13,7 +13,7 @@ export default function WaitingPage() {
 
   return (
     // This div provides the simple, non-interactive background
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <WaitingForHost open={true} onClose={handleClose} />
     </div>
   );
