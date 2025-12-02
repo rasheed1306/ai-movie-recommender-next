@@ -75,7 +75,16 @@ export async function POST(
 
       // TODO: Call the Python AI service with aiPayload
 
-      // TODO: Update Session Status to 'complete' and save results generated
+      // TODO: Update Session Status to 'complete'
+      const {error: statusError} = await supabase
+        .from("sessions")
+        .update({status: 'complete'})
+        .eq("id", session.id);
+
+        if (statusError) throw statusError;
+
+      // TODO: Save AI Recommendations to DB
+
     }
 
     return NextResponse.json({ success: true, allDone: allDone });
