@@ -60,7 +60,6 @@ DROP POLICY IF EXISTS "Clients can create player rows" ON public.session_users;
 DROP POLICY IF EXISTS "Clients can read player rows" ON public.session_users;
 DROP POLICY IF EXISTS "Clients can update player rows" ON public.session_users;
 DROP POLICY IF EXISTS "Clients can delete player rows" ON public.session_users;
-DROP FUNCTION is_user_in_session(uuid,uuid);
 
 -- Sessions policies 
 CREATE POLICY "Authenticated users can create sessions"
@@ -105,3 +104,6 @@ CREATE POLICY "Clients can delete player rows"
   FOR DELETE
   TO authenticated
   USING (true);
+
+-- Enable Realtime for sessions table (Required for subscriptions to work)
+alter publication supabase_realtime add table public.sessions;
