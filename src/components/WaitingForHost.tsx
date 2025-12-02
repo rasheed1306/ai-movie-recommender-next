@@ -1,11 +1,54 @@
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/integrations/supabase/client";
 
 interface WaitingForHostProps {
   open: boolean;
   onClose: () => void;
+  partyCode: string;
 }
 
-const WaitingForHost = ({ open, onClose }: WaitingForHostProps) => {
+const WaitingForHost = ({ open, onClose, partyCode }: WaitingForHostProps) => {
+  const router = useRouter();
+  const supabase = createClient();
+
+  useEffect(() => {
+    // Only subscribe when dialog is open
+    if (!open) return;
+
+    console.log("Subscribing to session updates for partyCode:", partyCode); // Added: Debug subscription start
+
+    const channel = supabase.channel(`session:${partyCode}`);
+
+    // Listen for session status update to "in_progress"
+    const subscription = channel
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "sessions",
+          filter: `party_code=eq.${partyCode}`,
+        },
+        (payload) => {
+          console.log("Received payload:", payload); // Added: Debug payload
+
+          if (payload.new.status === "in_progress") {
+            console.log("Redirecting to quiz..."); // Added: Debug redirect
+
+            // Redirect on status change
+            router.push(`/quiz?partyCode=${partyCode}`);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel); // Cleanup on unmount
+    };
+  }, [open, partyCode, router, supabase]); // Dependencies
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
