@@ -17,14 +17,16 @@ interface PartyLobbyProps {
   initialSession: SessionWithUsers;
 }
 
-async function fetchSession(partyCode: string): Promise<SessionWithUsers | null> {
+async function fetchSession(
+  partyCode: string
+): Promise<SessionWithUsers | null> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("sessions")
     .select(`*, session_users(user_name, is_done)`)
     .eq("party_code", partyCode.toUpperCase())
     .single();
-  
+
   if (error) throw new Error("Could not fetch session details.");
   return data;
 }
@@ -56,9 +58,24 @@ export function PartyLobby({ initialSession }: PartyLobbyProps) {
     }
   };
 
-  const handleStartQuiz = () => {
-    // TODO: Add logic to change session status to 'in_progress'
-    router.push(`/quiz?partyCode=${partyCode}`);
+  const handleStartQuiz = async () => {
+    try {
+      const response = await fetch(`/api/sessions/${partyCode}/start`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        const { error } = await response.json();
+        toast.error(error || "Failed to start quiz");
+        return;
+      }
+
+      // Redirect to quiz page
+      router.push(`/quiz?partyCode=${partyCode}`);
+    } catch (err) {
+      toast.error("Failed to start quiz");
+    }
   };
 
   return (
@@ -79,7 +96,9 @@ export function PartyLobby({ initialSession }: PartyLobbyProps) {
           </p>
 
           <div className="mb-8">
-            <p className="text-sm text-muted-foreground mb-2">Your Party Code</p>
+            <p className="text-sm text-muted-foreground mb-2">
+              Your Party Code
+            </p>
             <div className="bg-background/50 rounded-xl p-6 mb-6">
               <p className="text-5xl font-bold font-mono text-foreground tracking-wider">
                 {partyCode}
@@ -93,24 +112,42 @@ export function PartyLobby({ initialSession }: PartyLobbyProps) {
                   {shareLink}
                 </p>
               </div>
-              <Button variant="outline" size="icon" onClick={handleCopyLink} className="h-12 w-12 flex-shrink-0">
-                {copied ? <Check className="h-4 w-4 text-primary" /> : <Copy className="h-4 w-4" />}
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleCopyLink}
+                className="h-12 w-12 flex-shrink-0"
+              >
+                {copied ? (
+                  <Check className="h-4 w-4 text-primary" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </div>
 
           <div className="mb-6">
-            <p className="text-muted animate-pulse">Waiting for friends to join... ⏳</p>
+            <p className="text-muted animate-pulse">
+              Waiting for friends to join... ⏳
+            </p>
             <div className="flex flex-wrap justify-center gap-2 mt-4">
-              {session.session_users.map(p => (
-                <div key={p.user_name} className="bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-medium">
+              {session.session_users.map((p) => (
+                <div
+                  key={p.user_name}
+                  className="bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-medium"
+                >
                   {p.user_name}
                 </div>
               ))}
             </div>
           </div>
 
-          <Button onClick={handleStartQuiz} className="w-full h-14 bg-primary text-primary-foreground hover:bg-primary/90 text-lg font-semibold" size="lg">
+          <Button
+            onClick={handleStartQuiz}
+            className="w-full h-14 bg-primary text-primary-foreground hover:bg-primary/90 text-lg font-semibold"
+            size="lg"
+          >
             Start Quiz 🎬
           </Button>
 
