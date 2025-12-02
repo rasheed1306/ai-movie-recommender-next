@@ -29,7 +29,7 @@ export async function POST(
       );
     }
 
-    // Update the session_users table
+    // Update the session_users table for current user
     const { error } = await supabase
       .from("session_users")
       .update({
@@ -40,7 +40,45 @@ export async function POST(
 
     if (error) throw error;
 
-    return NextResponse.json({ success: true });
+    // 2. Check if ALL users in this session are done
+    // First, get the session ID
+    const { data: session } = await supabase
+      .from("sessions")
+      .select("id")
+      .eq("party_code", partyCode)
+      .single();
+
+    if (!session) throw new Error("Session not found");
+
+    // Fetch all users for this session
+    const { data: allUsers, error: usersError } = await supabase
+      .from("session_users")
+      .select("user_name, answers, is_done")
+      .eq("session_id", session.id);
+
+    if (usersError) throw usersError;
+
+    // Check if everyone is done
+    const allDone = allUsers.every((user) => user.is_done);
+
+    if (allDone) {
+      console.log("🎉 All users finished! Triggering AI...");
+
+      // 3. Prepare the JSON Payload for Python
+      // Format: { "Rasheed": { ...answers }, "Abba": { ...answers } }
+      const aiPayload = allUsers.reduce((acc, user) => {
+        acc[user.user_name] = user.answers;
+        return acc;
+      }, {} as Record<string, any>);
+
+      console.log("Payload for AI:", JSON.stringify(aiPayload, null, 2));
+
+      // TODO: Call the Python AI service with aiPayload
+
+      // TODO: Update Session Status to 'complete' and save results generated
+    }
+
+    return NextResponse.json({ success: true, allDone: allDone });
   } catch (error) {
     console.error("Error submitting answers:", error);
     return NextResponse.json(

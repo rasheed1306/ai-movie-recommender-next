@@ -91,7 +91,17 @@ export function Quiz() {
   const handleFinish = async () => {
     setIsSubmitting(true);
 
-    console.log("Quiz finished, answers:", answers);
+    // Transform answers to use question text as keys
+    const formattedAnswers = Object.keys(answers).reduce((acc, key) => {
+      const index = Number(key);
+      const question = quizQuestions[index]?.question;
+      if (question) {
+        acc[question] = answers[index];
+      }
+      return acc;
+    }, {} as Record<string, string>);
+
+    console.log("Quiz finished, answers:", formattedAnswers);
 
     // Save answers to database
     const sessionUserId = sessionStorage.getItem("sessionUserID");
@@ -108,7 +118,7 @@ export function Quiz() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sessionUserId,
-          answers,
+          answers: formattedAnswers,
         }),
       });
 
@@ -122,8 +132,6 @@ export function Quiz() {
       setIsSubmitting(false);
     }
 
-    // // Navigate to results page
-    // router.push("/results");
   };
 
   return (
