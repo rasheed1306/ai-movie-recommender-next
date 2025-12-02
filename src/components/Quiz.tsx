@@ -10,6 +10,7 @@ import { ArrowLeft, Film } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { WaitingForResults } from "@/components/WaitingForResults"; 
 import { set } from "zod";
 
 const quizQuestions = [
@@ -67,6 +68,7 @@ export function Quiz() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<{ [key: number]: string }>({});
   const [is_submitting, setIsSubmitting] = useState(false);
+  const [showWaiting, setShowWaiting] = useState(false);
 
   const progress = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
   const currentQuestion = quizQuestions[currentQuestionIndex];
@@ -125,13 +127,13 @@ export function Quiz() {
       if (!response.ok) throw new Error("Failed to submit");
 
       // Navigate to results/waiting page
-      router.push(`/results?partyCode=${partyCode}`);
+      // router.push(`/results?partyCode=${partyCode}`);
+      setShowWaiting(true);
     } catch (error) {
       console.error(error);
       toast.error("Failed to submit answers. Please try again.");
       setIsSubmitting(false);
     }
-
   };
 
   return (
@@ -210,6 +212,13 @@ export function Quiz() {
           </div>
         </div>
       </div>
+
+      {/* Add the Waiting Component at the end */}
+      <WaitingForResults
+        open={showWaiting}
+        partyCode={partyCode}
+        onComplete={() => router.push(`/results?partyCode=${partyCode}`)}
+      />
     </div>
   );
 }
