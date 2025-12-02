@@ -20,7 +20,7 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-async function createSession(data: FormData): Promise<{ partyCode: string }> {
+async function createSession(data: FormData): Promise<{ partyCode: string, sessionUserId: string }> {
   const response = await fetch("/api/sessions", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -46,6 +46,11 @@ export function StartPartyForm() {
   const { mutate, isPending } = useMutation({
     mutationFn: createSession,
     onSuccess: (data) => {
+      // Save host's session user ID to localStorage (for Quiz component)
+      if (data.sessionUserId) {
+        localStorage.setItem("sessionUserID", data.sessionUserId);
+      }
+
       toast.success("Party created successfully! 🥳");
       router.push(`/party/${data.partyCode}`);
     },
@@ -66,16 +71,23 @@ export function StartPartyForm() {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Film className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-foreground">MovieMatch</span>
+            <span className="text-2xl font-bold text-foreground">
+              MovieMatch
+            </span>
           </div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Start a Watch Party 🎬</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            Start a Watch Party 🎬
+          </h1>
           <p className="text-muted">Let's get started with your movie night</p>
         </div>
 
         <div className="bg-card rounded-2xl p-8 shadow-lg border border-border">
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="partyName" className="text-card-foreground font-medium">
+              <Label
+                htmlFor="partyName"
+                className="text-card-foreground font-medium"
+              >
                 Name Your Watch Party
               </Label>
               <Input
@@ -85,13 +97,18 @@ export function StartPartyForm() {
                 className="h-12 bg-background/50 border-border"
               />
               {form.formState.errors.partyName && (
-                <p className="text-xs text-destructive">{form.formState.errors.partyName.message}</p>
+                <p className="text-xs text-destructive">
+                  {form.formState.errors.partyName.message}
+                </p>
               )}
               <p className="text-xs text-muted">Make it memorable!</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="userName" className="text-card-foreground font-medium">
+              <Label
+                htmlFor="userName"
+                className="text-card-foreground font-medium"
+              >
                 What's Your Name?
               </Label>
               <Input
@@ -101,9 +118,13 @@ export function StartPartyForm() {
                 className="h-12 bg-background/50 border-border"
               />
               {form.formState.errors.userName && (
-                <p className="text-xs text-destructive">{form.formState.errors.userName.message}</p>
+                <p className="text-xs text-destructive">
+                  {form.formState.errors.userName.message}
+                </p>
               )}
-              <p className="text-xs text-muted">So your friends know who's hosting</p>
+              <p className="text-xs text-muted">
+                So your friends know who's hosting
+              </p>
             </div>
 
             <div className="flex gap-3 pt-4">
@@ -113,11 +134,23 @@ export function StartPartyForm() {
                   Back
                 </Button>
               </Link>
-              <Button type="submit" disabled={isButtonDisabled} className="flex-1 h-12 bg-primary text-primary-foreground hover:bg-primary/90">
-                {isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : "Create Party"}
+              <Button
+                type="submit"
+                disabled={isButtonDisabled}
+                className="flex-1 h-12 bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                {isPending ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  "Create Party"
+                )}
               </Button>
             </div>
-            {!session && <p className="text-center text-xs text-muted-foreground pt-2">Connecting to server...</p>}
+            {!session && (
+              <p className="text-center text-xs text-muted-foreground pt-2">
+                Connecting to server...
+              </p>
+            )}
           </form>
         </div>
       </div>

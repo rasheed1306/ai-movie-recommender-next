@@ -8,8 +8,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Film } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSearchParams } from "next/navigation"; 
-import {toast} from "sonner";
+import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+import { set } from "zod";
 
 const quizQuestions = [
   {
@@ -93,12 +94,36 @@ export function Quiz() {
     console.log("Quiz finished, answers:", answers);
 
     // Save answers to database
-    const sessionUserId = localStorage.getItem("sessionUserId");
+    const sessionUserId = localStorage.getItem("sessionUserID");
 
+    if (!sessionUserId || !partyCode) {
+      toast.error("Session information missing. Please rejoin.");
+      setIsSubmitting(false);
+      return;
+    }
 
+    try {
+      const response = await fetch(`/api/sessions/${partyCode}/answers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionUserId,
+          answers,
+        }),
+      });
 
-    // Navigate to results page
-    router.push("/results");
+      if (!response.ok) throw new Error("Failed to submit");
+
+      // Navigate to results/waiting page
+      router.push(`/results?partyCode=${partyCode}`);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to submit answers. Please try again.");
+      setIsSubmitting(false);
+    }
+
+    // // Navigate to results page
+    // router.push("/results");
   };
 
   return (

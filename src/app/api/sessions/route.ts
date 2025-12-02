@@ -59,7 +59,7 @@ export async function POST(req: Request) {
       })
       .select()
       .single();
-    console.log("Session insert result:", sessionData, sessionError);
+    // console.log("Session insert result:", sessionData, sessionError);
 
     if (sessionError || !sessionData) {
       console.error("Session creation error:", sessionError);
@@ -70,12 +70,16 @@ export async function POST(req: Request) {
     }
 
     // Add the host to the session_users table
-    const { error: userError } = await supabase.from("session_users").insert({
+    const { data: hostUser, error: userError } = await supabase.from("session_users").insert({
       session_id: sessionData.id,
       user_id: user.id,
       user_name: userName,
-    });
-    console.log("User insert result:", userError); // Add this after insert
+      is_done: false,
+    })
+    .select("id")
+    .single();
+    
+    // console.log("User insert result:", userError); // Add this after insert
 
     if (userError) {
       console.error("Session user creation error:", userError);
@@ -87,7 +91,7 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json({ partyCode: sessionData.party_code });
+    return NextResponse.json({ success: true, partyCode: sessionData.party_code, sessionUserId: hostUser.id });
   } catch (e) {
     console.error("Unexpected error:", e);
     return NextResponse.json(

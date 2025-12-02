@@ -47,8 +47,8 @@ export default function JoinPartyForm() {
         throw new Error(errorMessage);
       }
 
-      if (data.sessionUserId) {
-        localStorage.setItem("movieMatch_userID", data.sessionUserId);
+      if (data.hostUserId) {
+        localStorage.setItem("sessionUserID", data.sessionUserId);
       }
 
       // Save session user ID to local storage
