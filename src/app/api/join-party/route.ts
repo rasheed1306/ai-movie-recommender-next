@@ -58,18 +58,20 @@ export async function POST(req: Request) {
     }
 
     // 3. Add user to the session
-    const { error: insertError } = await supabase.from("session_users").insert(
+    const { data: newUser,  error: insertError } = await supabase.from("session_users").insert(
       {
         session_id: sessionData.id,
         user_id: user.id,
         user_name: userName,
         is_done: false,
       },
-    );
+    )
+    .select("id")
+    .single();
 
     if (insertError) throw insertError;
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, sessionUserId: newUser.id});
   } catch (error) {
     console.error("Join API Error:", error);
     return NextResponse.json(

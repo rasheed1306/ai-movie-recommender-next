@@ -33,6 +33,8 @@ export default function JoinPartyForm() {
         body: JSON.stringify({ partyCode, userName }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
         let errorMessage =
           "Hmm, that code doesn't look right. Please try again! 🤔";
@@ -44,6 +46,12 @@ export default function JoinPartyForm() {
         }
         throw new Error(errorMessage);
       }
+
+      if (data.sessionUserId) {
+        localStorage.setItem("movieMatch_userID", data.sessionUserId);
+      }
+
+      // Save session user ID to local storage
 
       // On success, redirect to the waiting page
       router.push(`/join-party/${partyCode}/waiting`);

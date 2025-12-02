@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, Film } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSearchParams } from "next/navigation"; 
+import {toast} from "sonner";
 
 const quizQuestions = [
   {
@@ -59,8 +61,11 @@ const quizQuestions = [
 
 export function Quiz() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const partyCode = searchParams.get("partyCode") || "";
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<{ [key: number]: string }>({});
+  const [is_submitting, setIsSubmitting] = useState(false);
 
   const progress = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
   const currentQuestion = quizQuestions[currentQuestionIndex];
@@ -82,8 +87,16 @@ export function Quiz() {
     }
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
+    setIsSubmitting(true);
+
     console.log("Quiz finished, answers:", answers);
+
+    // Save answers to database
+    const sessionUserId = localStorage.getItem("sessionUserId");
+
+
+
     // Navigate to results page
     router.push("/results");
   };

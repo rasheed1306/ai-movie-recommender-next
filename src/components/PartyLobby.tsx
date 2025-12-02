@@ -43,6 +43,8 @@ export function PartyLobby({ initialSession }: PartyLobbyProps) {
     refetchInterval: 5000, // Poll for updates every 5 seconds
   });
 
+  const currentSession = session || initialSession;
+
   const shareLink = `${
     typeof window !== "undefined" ? window.location.origin : ""
   }/join-party?code=${partyCode}`;
@@ -89,7 +91,7 @@ export function PartyLobby({ initialSession }: PartyLobbyProps) {
           </div>
 
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            {session.name || "Party Created!"} 🎉
+            {currentSession.name || "Party Created!"} 🎉
           </h1>
           <p className="text-muted mb-8">
             Share this code with your friends to join.
@@ -132,7 +134,7 @@ export function PartyLobby({ initialSession }: PartyLobbyProps) {
               Waiting for friends to join... ⏳
             </p>
             <div className="flex flex-wrap justify-center gap-2 mt-4">
-              {session.session_users.map((p) => (
+              {currentSession.session_users.map((p) => (
                 <div
                   key={p.user_name}
                   className="bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-medium"
