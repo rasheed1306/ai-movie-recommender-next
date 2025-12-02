@@ -46,9 +46,9 @@ export function StartPartyForm() {
   const { mutate, isPending } = useMutation({
     mutationFn: createSession,
     onSuccess: (data) => {
-      // Save host's session user ID to localStorage (for Quiz component)
+      // Save host's session user ID to sessionStorage (for Quiz component)
       if (data.sessionUserId) {
-        localStorage.setItem("sessionUserID", data.sessionUserId);
+        sessionStorage.setItem("sessionUserID", data.sessionUserId);
       }
 
       toast.success("Party created successfully! 🥳");

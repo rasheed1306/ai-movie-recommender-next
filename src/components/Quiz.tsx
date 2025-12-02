@@ -94,7 +94,7 @@ export function Quiz() {
     console.log("Quiz finished, answers:", answers);
 
     // Save answers to database
-    const sessionUserId = localStorage.getItem("sessionUserID");
+    const sessionUserId = sessionStorage.getItem("sessionUserID");
 
     if (!sessionUserId || !partyCode) {
       toast.error("Session information missing. Please rejoin.");

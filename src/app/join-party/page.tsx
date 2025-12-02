@@ -47,11 +47,10 @@ export default function JoinPartyForm() {
         throw new Error(errorMessage);
       }
 
-      if (data.hostUserId) {
-        localStorage.setItem("sessionUserID", data.sessionUserId);
-      }
-
       // Save session user ID to local storage
+      if (data.sessionUserId) {
+        sessionStorage.setItem("sessionUserID", data.sessionUserId);
+      }
 
       // On success, redirect to the waiting page
       router.push(`/join-party/${partyCode}/waiting`);
