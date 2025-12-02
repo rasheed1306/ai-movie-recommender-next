@@ -58,14 +58,13 @@ export async function POST(req: Request) {
     }
 
     // 3. Add user to the session
-    const { error: insertError } = await supabase.from("session_users").upsert(
+    const { error: insertError } = await supabase.from("session_users").insert(
       {
         session_id: sessionData.id,
         user_id: user.id,
         user_name: userName,
         is_done: false,
       },
-      { onConflict: "session_id,user_id" }
     );
 
     if (insertError) throw insertError;

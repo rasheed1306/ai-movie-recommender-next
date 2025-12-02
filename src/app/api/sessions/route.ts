@@ -70,11 +70,11 @@ export async function POST(req: Request) {
     }
 
     // Add the host to the session_users table
-    const { error: userError } = await supabase.from("session_users").upsert({
+    const { error: userError } = await supabase.from("session_users").insert({
       session_id: sessionData.id,
       user_id: user.id,
       user_name: userName,
-    }, { onConflict: "session_id,user_id" });
+    });
     console.log("User insert result:", userError); // Add this after insert
 
     if (userError) {
