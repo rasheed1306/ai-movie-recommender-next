@@ -5,8 +5,11 @@ from dotenv import load_dotenv
 import asyncio
 from content import get_movies
 from typing import Any, List, Dict, cast
+from pathlib import Path
 
-load_dotenv()
+# Load .env.local from the parent directory
+env_path = Path(__file__).resolve().parent.parent / '.env.local'
+load_dotenv(dotenv_path=env_path)
 
 SUPABASE_URL: str  = os.getenv("SUPABASE_URL") or ""
 SUPABASE_KEY: str = os.getenv("SUPABASE_API_KEY") or ""
@@ -31,7 +34,13 @@ async def search_movies(query: str, threshold: float = 0.7, count: int = 5) -> L
     }).execute()
     return cast(List[Dict[str,  Any]], response.data)
 
-async def search_movies_for_group(queries: list[str], threshold: float = 0.7, count: int = 5) -> List[Dict[str, Any]]:
+async def search_movies_for_group(group_preferences: Dict[str, Dict[str, str]], threshold: float = 0.7, count: int = 5) -> List[Dict[str, Any]]:
+    queries = []
+    for user, answers in group_preferences.items():
+        # Combine all answers into a single descriptive string for the user
+        user_query = ". ".join(answers.values())
+        queries.append(user_query)
+
     query_embeddings = await asyncio.gather(*[get_embedding(query) for query in queries])
     # Calculate average embedding
     embeddings = [emb['embedding'] for emb in query_embeddings]
@@ -59,11 +68,22 @@ async def main(input: List[Dict[str, str]]) -> None:
     test_results = await search_movies("A wholesome kid friendly movie about adventure and friendship, fantasy is preferred", threshold=0, count=3)
     print("Test search results:", test_results)
 
-    group_queries_test = [
-        "A thrilling action movie with lots of suspense and excitement.",
-        "A dramatic story with deep emotional moments and character development.",
-        "A light-hearted comedy that will make me laugh and feel good."
-    ]
+    group_queries_test = {
+        "Ahmed": {
+            "What's your mood for tonight?": "Light & uplifting",
+            "What's your ideal movie length?": "Under 90 minutes",
+            "What's your favorite movie genre?": "Action & Adventure",
+            "How do you feel about plot twists?": "Love unexpected surprises",
+            "Do you prefer movies that make you think or feel?": "Thought-provoking & complex"
+        },
+        "Ammu": {
+            "What's your mood for tonight?": "Dark & intense",
+            "What's your ideal movie length?": "90-120 minutes",
+            "What's your favorite movie genre?": "Comedy & Romance",
+            "How do you feel about plot twists?": "Prefer straightforward stories",
+            "Do you prefer movies that make you think or feel?": "Emotionally moving"
+        }
+    }
     group_results = await search_movies_for_group(group_queries_test, threshold=0, count=3)
     print("Group search results:", group_results)
 
