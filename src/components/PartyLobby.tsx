@@ -61,10 +61,17 @@ export function PartyLobby({ initialSession }: PartyLobbyProps) {
   };
 
   const handleStartQuiz = async () => {
+    const sessionUserId = sessionStorage.getItem("sessionUserID");
+    if (!sessionUserId) {
+      toast.error("Session information missing. Please rejoin.");
+      return;
+    }
+
     try {
       const response = await fetch(`/api/sessions/${partyCode}/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: sessionUserId }),
       });
 
       if (!response.ok) {

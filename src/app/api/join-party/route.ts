@@ -47,6 +47,11 @@ export async function POST(req: Request) {
       );
     }
 
+    // Optional: Get authenticated user
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
+
     const userId = randomUUID();
 
     // 3. Add user to the session
@@ -54,16 +59,17 @@ export async function POST(req: Request) {
       {
         session_id: sessionData.id,
         user_id: userId,
+        auth_user_id: authUser?.id || null,
         user_name: userName,
         is_done: false,
       },
     )
-    .select("id")
+    .select("user_id")
     .single();
 
     if (insertError) throw insertError;
 
-    return NextResponse.json({ success: true, sessionUserId: newUser.id});
+    return NextResponse.json({ success: true, sessionUserId: newUser.user_id});
   } catch (error) {
     console.error("Join API Error:", error);
     return NextResponse.json(

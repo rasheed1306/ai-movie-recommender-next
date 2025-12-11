@@ -35,6 +35,11 @@ export async function POST(req: Request) {
       );
     }
 
+    // Optional: Get authenticated user
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
+
     const partyCode = generatePartyCode();
     const hostId = randomUUID();
 
@@ -63,10 +68,11 @@ export async function POST(req: Request) {
     const { data: hostUser, error: userError } = await supabase.from("session_users").insert({
       session_id: sessionData.id,
       user_id: hostId,
+      auth_user_id: authUser?.id || null,
       user_name: userName,
       is_done: false,
     })
-    .select("id")
+    .select("user_id")
     .single();
     
     // console.log("User insert result:", userError); // Add this after insert
@@ -81,7 +87,7 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json({ success: true, partyCode: sessionData.party_code, sessionUserId: hostUser.id });
+    return NextResponse.json({ success: true, partyCode: sessionData.party_code, sessionUserId: hostUser.user_id });
   } catch (e) {
     console.error("Unexpected error:", e);
     return NextResponse.json(

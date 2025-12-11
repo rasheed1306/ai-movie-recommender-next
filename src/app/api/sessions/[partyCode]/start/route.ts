@@ -20,11 +20,16 @@ export async function POST(
 
   try {
     // Get authenticated user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // const {
+    //   data: { user },
+    // } = await supabase.auth.getUser();
+    // if (!user) {
+    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // }
+
+    const { userId } = await req.json();
+    if (!userId) {
+      return NextResponse.json({ error: "Missing User ID" }, { status: 401 });
     }
 
     const {partyCode} = await params;
@@ -41,7 +46,7 @@ export async function POST(
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
     }
 
-    if (session.host_id !== user.id) {
+    if (session.host_id !== userId) {
       return NextResponse.json(
         { error: "Only the host can start the quiz" },
         { status: 403 }

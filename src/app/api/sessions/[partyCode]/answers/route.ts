@@ -36,7 +36,7 @@ export async function POST(
         answers: answers,
         is_done: true,
       })
-      .eq("id", sessionUserId); // Identify user by their specific session_user ID
+      .eq("user_id", sessionUserId); // Identify user by their specific session_user ID
 
     if (error) throw error;
 
