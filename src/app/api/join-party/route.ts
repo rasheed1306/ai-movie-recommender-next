@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { Database } from "@/lib/database.types";
+import { randomUUID } from "crypto";
 
 export async function POST(req: Request) {
   const cookieStore = await cookies();
@@ -16,17 +17,6 @@ export async function POST(req: Request) {
   );
 
   try {
-    // 1. Check if user is logged in (anonymous or real)
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json(
-        { error: "Authentication failed" },
-        { status: 401 }
-      );
-    }
-
     const { partyCode, userName } = await req.json();
 
     if (!partyCode || !userName) {
@@ -57,11 +47,13 @@ export async function POST(req: Request) {
       );
     }
 
+    const userId = randomUUID();
+
     // 3. Add user to the session
     const { data: newUser,  error: insertError } = await supabase.from("session_users").insert(
       {
         session_id: sessionData.id,
-        user_id: user.id,
+        user_id: userId,
         user_name: userName,
         is_done: false,
       },

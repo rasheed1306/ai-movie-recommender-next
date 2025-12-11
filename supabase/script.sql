@@ -14,7 +14,7 @@ DROP TABLE IF EXISTS public.sessions CASCADE;
 -- Create the sessions table
 CREATE TABLE public.sessions (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  host_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  host_id UUID NOT NULL,
   status session_status NOT NULL DEFAULT 'waiting',
   results JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -23,7 +23,7 @@ CREATE TABLE public.sessions (
 );
 
 COMMENT ON TABLE public.sessions IS 'Stores information about each movie watch party session.';
-COMMENT ON COLUMN public.sessions.host_id IS 'The user ID of the person who created the session (for this auth session only).';
+COMMENT ON COLUMN public.sessions.host_id IS 'The user ID of the person who created the session (random UUID).';
 COMMENT ON COLUMN public.sessions.status IS 'The current status of the session: waiting, in_progress, or complete.';
 COMMENT ON COLUMN public.sessions.results IS 'Stores the AI-generated movie recommendations as a JSON object.';
 COMMENT ON COLUMN public.sessions.party_code IS 'A unique 6-character code for users to join the session.';
@@ -32,7 +32,7 @@ COMMENT ON COLUMN public.sessions.party_code IS 'A unique 6-character code for u
 CREATE TABLE public.session_users (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   session_id UUID NOT NULL REFERENCES public.sessions(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL,
   user_name TEXT NOT NULL,
   answers JSONB,
   is_done BOOLEAN NOT NULL DEFAULT FALSE,
@@ -41,7 +41,7 @@ CREATE TABLE public.session_users (
 
 COMMENT ON TABLE public.session_users IS 'Links players (by id) to sessions and stores their quiz answers.';
 COMMENT ON COLUMN public.session_users.id IS 'Unique player/session instance (used by the client as player token).';
-COMMENT ON COLUMN public.session_users.user_id IS 'Auth user who created this player row (for auditing, not RLS ownership).';
+COMMENT ON COLUMN public.session_users.user_id IS 'Random UUID for the user.';
 COMMENT ON COLUMN public.session_users.user_name IS 'The display name of the player for this session.';
 COMMENT ON COLUMN public.session_users.answers IS 'The player''s answers to the quiz questions.';
 COMMENT ON COLUMN public.session_users.is_done IS 'Indicates if the player has completed the quiz.';

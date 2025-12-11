@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 
 function generatePartyCode(length = 6) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -24,18 +25,6 @@ export async function POST(req: Request) {
   );
 
   try {
-    // console.log("Starting session creation...");
-    // Get authenticated user
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    console.log("User fetched:", user);
-
-    if (!user) {
-      console.log("No user found");
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const { partyName, userName } = await req.json();
     console.log("Request data:", { partyName, userName });
 
@@ -47,12 +36,13 @@ export async function POST(req: Request) {
     }
 
     const partyCode = generatePartyCode();
+    const hostId = randomUUID();
 
     // Create the session
     const { data: sessionData, error: sessionError } = await supabase
       .from("sessions")
       .insert({
-        host_id: user.id,
+        host_id: hostId,
         party_code: partyCode,
         name: partyName,
         status: "waiting",
@@ -72,7 +62,7 @@ export async function POST(req: Request) {
     // Add the host to the session_users table
     const { data: hostUser, error: userError } = await supabase.from("session_users").insert({
       session_id: sessionData.id,
-      user_id: user.id,
+      user_id: hostId,
       user_name: userName,
       is_done: false,
     })
