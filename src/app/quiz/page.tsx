@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import { Quiz } from "@/components/Quiz";
 
 export const metadata: Metadata = {
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function QuizPage() {
-  return <Quiz />;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Quiz />
+    </Suspense>
+  );
 }

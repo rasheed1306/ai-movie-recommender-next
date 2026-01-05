@@ -5,7 +5,7 @@ import { PartyLobby } from "@/components/PartyLobby";
 import { Database } from "@/lib/database.types";
 
 type Props = {
-  params: { partyCode: string };
+  params: Promise<{ partyCode: string }>;
 };
 
 async function getSession(partyCode: string) {

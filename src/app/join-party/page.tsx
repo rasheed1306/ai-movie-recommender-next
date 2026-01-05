@@ -135,6 +135,13 @@ function JoinPartyContent() {
           </div>
         </div>
       </div>
+  );
+}
+
+export default function JoinPartyPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <JoinPartyContent />
     </Suspense>
   );
 }

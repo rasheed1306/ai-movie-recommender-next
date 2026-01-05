@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Results } from "@/components/Results";
 import { WaitingForResults } from "@/components/WaitingForResults";
 import { createClient } from "@/integrations/supabase/client";
 
-export default function ResultsPage() {
+function ResultsContent() {
   const searchParams = useSearchParams();
   const partyCode = searchParams.get("partyCode");
   const [status, setStatus] = useState<"loading" | "waiting" | "complete">(
@@ -53,4 +53,12 @@ export default function ResultsPage() {
   }
 
   return <Results />;
+}
+
+export default function ResultsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResultsContent />
+    </Suspense>
+  );
 }
