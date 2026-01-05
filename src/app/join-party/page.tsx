@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Film } from "lucide-react";
 
-export default function JoinPartyForm() {
+function JoinPartyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [partyCode, setPartyCode] = useState("");
@@ -61,7 +61,6 @@ export default function JoinPartyForm() {
   };
 
   return (
-    <Suspense fallback={<div>Loading...</div>}>
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
