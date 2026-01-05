@@ -5,7 +5,7 @@ import { Database } from "@/lib/database.types";
 
 export async function POST(
   req: Request,
-  { params }: { params: { partyCode: string } }
+  { params }: { params: Promise<{ partyCode: string }> }
 ) {
   const cookieStore = await cookies();
   const supabase = createServerClient<Database>(

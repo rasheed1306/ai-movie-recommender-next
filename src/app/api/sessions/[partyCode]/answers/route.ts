@@ -73,18 +73,47 @@ export async function POST(
 
       console.log("Payload for AI:", JSON.stringify(aiPayload, null, 2));
 
-      // TODO: Call the Python AI service with aiPayload
+      // Call the Python AI service with aiPayload
+      try {
+        const aiResponse = await fetch("http://127.0.0.1:8000/recommend", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ preferences: aiPayload }),
+        });
 
-      // TODO: Update Session Status to 'complete'
-      const {error: statusError} = await supabase
-        .from("sessions")
-        .update({status: 'complete'})
-        .eq("id", session.id);
+        if (!aiResponse.ok) {
+          console.error("AI Service Error:", await aiResponse.text());
+          // Don't throw here, we still want to mark session as complete if possible, 
+          // or maybe we should fail? For now let's log and continue but maybe not save results
+        } else {
+          const aiData = await aiResponse.json();
+          console.log("AI Recommendations received:", aiData);
+          
+          // Save AI Recommendations to DB
+          const { error: updateError } = await supabase
+            .from("sessions")
+            .update({ 
+              status: 'complete',
+              results: aiData.recommendations 
+            })
+            .eq("id", session.id);
 
-        if (statusError) throw statusError;
+          if (updateError) throw updateError;
+          
+          return NextResponse.json({ success: true, allDone: true, recommendations: aiData.recommendations });
+        }
 
-      // TODO: Save AI Recommendations to DB
+      } catch (aiError) {
+        console.error("Failed to connect to AI service:", aiError);
+        // Fallback: just mark complete without results if AI fails? 
+        // Or keep it waiting? Let's keep it waiting or handle error gracefully.
+      }
 
+      // If AI failed or wasn't called, we might still want to update status manually or handle it.
+      // For this step, let's assume if AI succeeds we update.
+      
     }
 
     return NextResponse.json({ success: true, allDone: allDone });
