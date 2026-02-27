@@ -24,13 +24,14 @@ app = FastAPI()
 class GroupPreferences(BaseModel):
     preferences: Dict[str, Dict[str, str]]
 
-# Conversational prompt template (the best one)
-CONVERSATIONAL_PROMPT = """Hey! Tell this group in 2-3 sentences why this movie is perfect for them.
+# Prompt template for clean AI recommendations
+CONVERSATIONAL_PROMPT = """Generate a 2-3 sentence movie recommendation explanation.
 
-Movie: {movie_title} - {movie_description}
-Group wants: {group_text}
+Movie: {movie_title}
+Description: {movie_description}
+Group preferences: {group_text}
 
-Keep it friendly and match their preferences to the movie.
+Write a compelling explanation of why this movie matches the group's preferences. Be specific, engaging, and conversational. Do not include greetings or meta-commentary. Start directly with the recommendation.
 
 Explanation:"""
 
