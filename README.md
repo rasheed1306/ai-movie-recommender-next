@@ -83,56 +83,18 @@ This project is built with:
 
 - Node.js & npm installed ([install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating))
 
-### Installation
-
-1. **Clone the repository**
-   ```sh
-   git clone <YOUR_GIT_URL>
-   cd <YOUR_PROJECT_NAME>
-   ```
-
-2. **Install dependencies**
-   ```sh
-   npm install
-   ```
-
-3. **Start the development server**
-   ```sh
-   npm run dev
-   ```
-
-4. **Open your browser**
-   - Navigate to `http://localhost:3000` to see the app in action
+ to see the app in action
 
 ### Environment Setup
 
 Create a `.env` file in the root directory and add your API keys:
 
 ```env
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_TMDB_API_KEY=your_tmdb_api_key
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY =your_supabase_anon_key
+
+Server-Only Secretes
+SUPABASE_URL=your_supabase_url
+SUPABASE_API_KEY=your_service_role_key
+OPENAI_API_KEY=your_openai_key
 ```
-
-## Deployment
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-## Future Updates
-
-1. **Add Diversity Option**:
-    - Add a toggle for host: for either "showing something which everyone likes" opposed to "something new for the group"
-    - Change the embedding AI chooses to have room for novelty
-
-2. **Group Chat/Voting**:
-    - Let the AI choose 3 movies for users, let users vote and decide which movie to pick
-
-## Contributing
-
-We welcome contributions! Please follow our coding guidelines and ensure all changes maintain the established tech stack and library usage rules outlined in `AI_RULES.md`.
-
-## License
-
-This project is licensed under the MIT License.
