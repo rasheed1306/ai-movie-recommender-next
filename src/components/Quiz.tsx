@@ -74,6 +74,23 @@ export function Quiz() {
   const currentQuestion = quizQuestions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === quizQuestions.length - 1;
 
+  // Handle Enter key to advance to next question
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === "Enter" && answers[currentQuestionIndex] && !is_submitting) {
+        e.preventDefault();
+        if (isLastQuestion) {
+          handleFinish();
+        } else {
+          handleNext();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [currentQuestionIndex, answers, isLastQuestion, is_submitting]);
+
   const handleAnswerSelect = (value: string) => {
     setAnswers({ ...answers, [currentQuestionIndex]: value });
   };
