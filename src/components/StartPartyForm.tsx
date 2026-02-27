@@ -128,12 +128,15 @@ export function StartPartyForm() {
             </div>
 
             <div className="flex gap-3 pt-4">
-              <Link href="/" className="flex-1">
-                <Button type="button" variant="outline" className="w-full h-12">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back
-                </Button>
-              </Link>
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="flex-1 h-12"
+                onClick={() => router.push("/")}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
               <Button
                 type="submit"
                 disabled={isButtonDisabled}

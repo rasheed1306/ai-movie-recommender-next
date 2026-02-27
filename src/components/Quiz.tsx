@@ -194,6 +194,7 @@ export function Quiz() {
           {/* Navigation */}
           <div className="flex justify-between items-center">
             <Button
+              type="button"
               variant="ghost"
               onClick={handleBack}
               disabled={currentQuestionIndex === 0}
@@ -202,6 +203,7 @@ export function Quiz() {
               Back
             </Button>
             <Button
+              type="button"
               onClick={isLastQuestion ? handleFinish : handleNext}
               disabled={!answers[currentQuestionIndex]}
               size="lg"

@@ -87,6 +87,11 @@ function JoinPartyContent() {
                   placeholder="e.g., ABC123 🔑"
                   value={partyCode}
                   onChange={(e) => setPartyCode(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && partyCode.trim() && userName.trim()) {
+                      handleJoinParty();
+                    }
+                  }}
                   maxLength={6}
                 />
                 <p className="text-xs text-muted-foreground">
@@ -103,6 +108,11 @@ function JoinPartyContent() {
                   placeholder="Your name ✨"
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && partyCode.trim() && userName.trim()) {
+                      handleJoinParty();
+                    }
+                  }}
                 />
                 <p className="text-xs text-muted-foreground">
                   Let everyone know you've arrived
@@ -117,6 +127,7 @@ function JoinPartyContent() {
 
               <div className="flex gap-3 pt-4">
                 <Button
+                  type="button"
                   variant="outline"
                   onClick={() => router.back()}
                   className="flex-1 h-12"
@@ -124,6 +135,7 @@ function JoinPartyContent() {
                   Back
                 </Button>
                 <Button
+                  type="button"
                   onClick={handleJoinParty}
                   disabled={!partyCode.trim() || !userName.trim() || isJoining}
                   className="flex-1 h-12 bg-primary text-primary-foreground hover:bg-primary/90"
