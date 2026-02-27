@@ -45,9 +45,7 @@ export function PartyLobby({ initialSession }: PartyLobbyProps) {
 
   const currentSession = session || initialSession;
 
-  const shareLink = `${
-    typeof window !== "undefined" ? window.location.origin : ""
-  }/join-party?code=${partyCode}`;
+  const shareLink = `/join-party?code=${partyCode}`;
 
   const handleCopyLink = async () => {
     try {

@@ -139,7 +139,7 @@ export function Results({ partyCode }: { partyCode: string }) {
               <div className="flex flex-wrap gap-2 mb-6">
                 {movie.genre && <Badge variant="secondary">{movie.genre}</Badge>}
                 {movie.runtime && <Badge variant="secondary">{movie.runtime}</Badge>}
-                {movie.rating && <Badge variant="secondary">⭐ {movie.rating}</Badge>}
+                {movie.rating && <Badge variant="secondary">⭐ {parseFloat(movie.rating).toFixed(1)}</Badge>}
               </div>
 
               <div className="mb-8">
