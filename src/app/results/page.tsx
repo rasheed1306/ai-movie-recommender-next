@@ -52,7 +52,7 @@ function ResultsContent() {
     );
   }
 
-  return <Results />;
+  return <Results partyCode={partyCode || ""} />;
 }
 
 export default function ResultsPage() {
