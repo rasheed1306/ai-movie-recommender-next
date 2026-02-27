@@ -1,9 +1,10 @@
 import os 
 from supabase import create_client, Client
-from openai import OpenAI, AsyncOpenAI
+from openai import AsyncOpenAI
 from dotenv import load_dotenv
 import asyncio
 from content import get_movies
+from prompts import get_prompt, DEFAULT_TEMPLATE
 from typing import Any, List, Dict, cast
 from pathlib import Path
 
@@ -33,6 +34,27 @@ async def search_movies(query: str, threshold: float = 0.7, count: int = 5) -> L
         'match_count': count
     }).execute()
     return cast(List[Dict[str,  Any]], response.data)
+
+async def generate_explanation(
+    movie_data: Dict[str, Any], 
+    group_preferences: Dict[str, Dict[str, str]],
+    template_name: str = DEFAULT_TEMPLATE
+) -> str:
+    """Generate a personalized explanation for why the group will love this movie."""
+    movie_title = movie_data.get('title', 'this movie')
+    movie_description = movie_data.get('description', movie_data.get('content', ''))
+    
+    prompt = get_prompt(template_name, movie_title, movie_description, group_preferences)
+
+    response = await openai.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7,
+        max_tokens=150
+    )
+    
+    return response.choices[0].message.content.strip() if response.choices[0].message.content else ""
+
 
 async def search_movies_for_group(group_preferences: Dict[str, Dict[str, str]], threshold: float = 0.7, count: int = 5) -> List[Dict[str, Any]]:
     queries = []
