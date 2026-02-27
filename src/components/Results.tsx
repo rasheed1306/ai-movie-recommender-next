@@ -43,12 +43,15 @@ export function Results({ partyCode }: { partyCode: string }) {
 
         if (fetchError) throw fetchError;
 
-        if (!data?.results || data.results.length === 0) {
+        // Type cast the results properly
+        const results = data?.results as unknown;
+        
+        if (!Array.isArray(results) || results.length === 0) {
           throw new Error("No recommendations found");
         }
 
         // Get the top recommendation
-        const topMovie = data.results[0];
+        const topMovie = (results[0] as unknown) as MovieRecommendation;
         setMovie(topMovie);
       } catch (err) {
         console.error("Error fetching results:", err);

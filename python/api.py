@@ -14,10 +14,10 @@ env_path = Path(__file__).resolve().parent.parent / '.env.local'
 load_dotenv(dotenv_path=env_path)
 
 # Initialize clients
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_API_KEY")
+SUPABASE_URL = os.getenv("SUPABASE_URL") or ""
+SUPABASE_KEY = os.getenv("SUPABASE_API_KEY") or ""
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-openai = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+openai = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY") or "")
 
 app = FastAPI()
 
@@ -69,28 +69,33 @@ async def search_movies_for_group(group_preferences: Dict[str, Dict[str, str]], 
         'match_count': count
     }).execute()
     
-    if not match_response.data:
+    if not match_response.data or not isinstance(match_response.data, list):
         return []
     
     # Extract movie IDs
-    movie_ids = [movie['id'] for movie in match_response.data]
+    movie_ids = [movie['id'] for movie in match_response.data if isinstance(movie, dict)]
+    
+    if not movie_ids:
+        return []
     
     # Fetch complete movie data from documents table
     movies_response = supabase.table('documents').select('*').in_('id', movie_ids).execute()
     
-    if not movies_response.data:
+    if not movies_response.data or not isinstance(movies_response.data, list):
         return []
     
     # Create a map of id to similarity score
-    similarity_map = {movie['id']: movie.get('similarity', 0) for movie in match_response.data}
+    similarity_map = {movie['id']: movie.get('similarity', 0) for movie in match_response.data if isinstance(movie, dict)}
     
     # Add similarity scores to complete movie data and sort by similarity
-    movies = movies_response.data
-    for movie in movies:
-        movie['similarity'] = similarity_map.get(movie['id'], 0)
+    movies: List[Dict[str, Any]] = []
+    for movie in movies_response.data:
+        if isinstance(movie, dict):
+            movie['similarity'] = similarity_map.get(movie.get('id'), 0)
+            movies.append(movie)
     
     # Sort by similarity (highest first)
-    movies.sort(key=lambda x: x.get('similarity', 0), reverse=True)
+    movies.sort(key=lambda x: x.get('similarity', 0) if isinstance(x.get('similarity'), (int, float)) else 0, reverse=True)
     
     return movies
 
