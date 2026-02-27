@@ -25,13 +25,13 @@ class GroupPreferences(BaseModel):
     preferences: Dict[str, Dict[str, str]]
 
 # Prompt template for clean AI recommendations
-CONVERSATIONAL_PROMPT = """Generate a 2-3 sentence movie recommendation explanation.
+CONVERSATIONAL_PROMPT = """You are a movie recommendation expert. Generate a compelling 2-3 sentence explanation for why this movie matches the group's preferences.
 
 Movie: {movie_title}
 Description: {movie_description}
 Group preferences: {group_text}
 
-Write a compelling explanation of why this movie matches the group's preferences. Be specific, engaging, and conversational. Do not include greetings or meta-commentary. Start directly with the recommendation.
+Write a natural, engaging explanation. Be specific about how the movie matches their preferences. Do not use quotation marks, greetings, or meta-commentary. Start directly with the explanation.
 
 Explanation:"""
 
@@ -62,13 +62,37 @@ async def search_movies_for_group(group_preferences: Dict[str, Dict[str, str]], 
     embeddings = [emb for emb in query_embeddings]
     avg_embedding = [sum(dim) / len(embeddings) for dim in zip(*embeddings)]
     
-    response = supabase.rpc('match_documents', {
+    # Get matches with similarity scores
+    match_response = supabase.rpc('match_documents', {
         'query_embedding': avg_embedding,
         'similarity_threshold': threshold,
         'match_count': count
     }).execute()
     
-    return response.data
+    if not match_response.data:
+        return []
+    
+    # Extract movie IDs
+    movie_ids = [movie['id'] for movie in match_response.data]
+    
+    # Fetch complete movie data from documents table
+    movies_response = supabase.table('documents').select('*').in_('id', movie_ids).execute()
+    
+    if not movies_response.data:
+        return []
+    
+    # Create a map of id to similarity score
+    similarity_map = {movie['id']: movie.get('similarity', 0) for movie in match_response.data}
+    
+    # Add similarity scores to complete movie data and sort by similarity
+    movies = movies_response.data
+    for movie in movies:
+        movie['similarity'] = similarity_map.get(movie['id'], 0)
+    
+    # Sort by similarity (highest first)
+    movies.sort(key=lambda x: x.get('similarity', 0), reverse=True)
+    
+    return movies
 
 async def generate_explanation(movie_data: Dict[str, Any], group_preferences: Dict[str, Dict[str, str]]) -> str:
     """Generate AI explanation for why the group will love this movie."""
