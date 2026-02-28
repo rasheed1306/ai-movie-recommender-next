@@ -73,9 +73,10 @@ export async function POST(
 
       console.log("Payload for AI:", JSON.stringify(aiPayload, null, 2));
 
-      // Call the Python AI service with aiPayload
+      // Call the Next.js AI service with aiPayload
       try {
-        const aiResponse = await fetch("http://127.0.0.1:8000/recommend", {
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `http://localhost:${process.env.PORT || 3000}`;
+        const aiResponse = await fetch(`${baseUrl}/api/recommend`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
