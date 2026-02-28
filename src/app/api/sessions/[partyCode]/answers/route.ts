@@ -75,7 +75,11 @@ export async function POST(
 
       // Call the Next.js AI service with aiPayload
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `http://localhost:${process.env.PORT || 3000}`;
+        // Get the host from the request headers - works for all environments
+        const host = req.headers.get('host') || 'localhost:3000';
+        const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+        const baseUrl = `${protocol}://${host}`;
+        
         const aiResponse = await fetch(`${baseUrl}/api/recommend`, {
           method: "POST",
           headers: {
