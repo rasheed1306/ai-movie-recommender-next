@@ -43,3 +43,6 @@ next-env.d.ts
 # Playwright
 .playwright-mcp
 *__pycache__
+
+# Cached .idea
+.idea
