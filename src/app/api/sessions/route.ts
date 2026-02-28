@@ -26,8 +26,6 @@ export async function POST(req: Request) {
 
   try {
     const { partyName, userName } = await req.json();
-    console.log("Request data:", { partyName, userName });
-
     if (!partyName || !userName) {
       return NextResponse.json(
         { error: "Missing partyName or userName" },
@@ -35,10 +33,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Optional: Get authenticated user
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
+    const { data: { user: authUser } } = await supabase.auth.getUser();
 
     const partyCode = generatePartyCode();
     const hostId = randomUUID();
@@ -54,7 +49,6 @@ export async function POST(req: Request) {
       })
       .select()
       .single();
-    // console.log("Session insert result:", sessionData, sessionError);
 
     if (sessionError || !sessionData) {
       console.error("Session creation error:", sessionError);
@@ -74,8 +68,6 @@ export async function POST(req: Request) {
     })
     .select("user_id")
     .single();
-    
-    // console.log("User insert result:", userError); // Add this after insert
 
     if (userError) {
       console.error("Session user creation error:", userError);

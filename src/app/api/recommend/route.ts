@@ -37,9 +37,6 @@ interface MovieData {
   [key: string]: any;
 }
 
-/**
- * Format group preferences into readable text
- */
 function formatGroupPreferences(
   groupPreferences: GroupPreferences
 ): string {
@@ -59,9 +56,6 @@ function formatGroupPreferences(
   return groupSummary.join("; ");
 }
 
-/**
- * Get embedding for text using OpenAI
- */
 async function getEmbedding(text: string): Promise<number[]> {
   const response = await openai.embeddings.create({
     input: text,
@@ -71,22 +65,15 @@ async function getEmbedding(text: string): Promise<number[]> {
   return response.data[0].embedding;
 }
 
-/**
- * Search for movies based on group preferences
- */
 async function searchMoviesForGroup(
   groupPreferences: GroupPreferences,
   threshold: number = 0.7,
   count: number = 3
 ): Promise<MovieData[]> {
-  // Build queries for each user
-  const queries: string[] = [];
-  for (const [_user, answers] of Object.entries(groupPreferences)) {
-    const userQuery = Object.values(answers).join(". ");
-    queries.push(userQuery);
-  }
+  const queries = Object.values(groupPreferences).map((answers) =>
+    Object.values(answers).join(". ")
+  );
 
-  // Get embeddings for all queries in parallel
   const queryEmbeddings = await Promise.all(
     queries.map((query) => getEmbedding(query))
   );
@@ -160,9 +147,6 @@ async function searchMoviesForGroup(
   return movies;
 }
 
-/**
- * Generate AI explanation for why the group will love this movie
- */
 async function generateExplanation(
   movieData: MovieData,
   groupPreferences: GroupPreferences
@@ -186,10 +170,6 @@ async function generateExplanation(
   return response.choices[0].message.content?.trim() || "";
 }
 
-/**
- * POST /api/recommend
- * Recommend movies based on group preferences
- */
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -202,9 +182,7 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log(
-      `Received preferences for ${Object.keys(preferences).length} users`
-    );
+  
 
     // Search for movies
     const results = await searchMoviesForGroup(preferences, 0, 3);

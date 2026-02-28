@@ -36,16 +36,14 @@ export function PartyLobby({ initialSession }: PartyLobbyProps) {
   const [copied, setCopied] = useState(false);
   const partyCode = initialSession.party_code;
 
-  const { data: session } = useQuery({
+  const { data: session = initialSession } = useQuery({
     queryKey: ["session", partyCode],
     queryFn: () => fetchSession(partyCode),
     initialData: initialSession,
-    refetchInterval: 5000, // Poll for updates every 5 seconds
+    refetchInterval: 5000,
   });
 
-  const currentSession = session || initialSession;
-
-  const shareLink = `/join-party?code=${partyCode}`;
+  const shareLink = `${window.location.origin}/join-party?code=${partyCode}`;
 
   const handleCopyLink = async () => {
     try {
@@ -96,7 +94,7 @@ export function PartyLobby({ initialSession }: PartyLobbyProps) {
           </div>
 
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            {currentSession.name || "Party Created!"} 🎉
+            {session.name || "Party Created!"} 🎉
           </h1>
           <p className="text-muted mb-8">
             Share this code with your friends to join.
@@ -139,7 +137,7 @@ export function PartyLobby({ initialSession }: PartyLobbyProps) {
               Waiting for friends to join... ⏳
             </p>
             <div className="flex flex-wrap justify-center gap-2 mt-4">
-              {currentSession.session_users.map((p) => (
+              {session.session_users.map((p) => (
                 <div
                   key={p.user_name}
                   className="bg-accent text-accent-foreground px-3 py-1 rounded-full text-sm font-medium"

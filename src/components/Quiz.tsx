@@ -10,8 +10,7 @@ import { ArrowLeft, Film } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { WaitingForResults } from "@/components/WaitingForResults"; 
-import { set } from "zod";
+import { WaitingForResults } from "@/components/WaitingForResults";
 
 const quizQuestions = [
   {
@@ -67,7 +66,7 @@ export function Quiz() {
   const partyCode = searchParams.get("partyCode") || "";
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<{ [key: number]: string }>({});
-  const [is_submitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showWaiting, setShowWaiting] = useState(false);
 
   const progress = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
@@ -77,7 +76,7 @@ export function Quiz() {
   // Handle Enter key to advance to next question
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && answers[currentQuestionIndex] && !is_submitting) {
+      if (e.key === "Enter" && answers[currentQuestionIndex] && !isSubmitting) {
         e.preventDefault();
         if (isLastQuestion) {
           handleFinish();
@@ -89,7 +88,7 @@ export function Quiz() {
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [currentQuestionIndex, answers, isLastQuestion, is_submitting]);
+  }, [currentQuestionIndex, answers, isLastQuestion, isSubmitting]);
 
   const handleAnswerSelect = (value: string) => {
     setAnswers({ ...answers, [currentQuestionIndex]: value });
@@ -222,7 +221,7 @@ export function Quiz() {
             <Button
               type="button"
               onClick={isLastQuestion ? handleFinish : handleNext}
-              disabled={!answers[currentQuestionIndex]}
+              disabled={!answers[currentQuestionIndex] || isSubmitting}
               size="lg"
               className="px-8"
             >
