@@ -17,9 +17,7 @@ interface PartyLobbyProps {
   initialSession: SessionWithUsers;
 }
 
-async function fetchSession(
-  partyCode: string
-): Promise<SessionWithUsers | null> {
+async function fetchSession(partyCode: string): Promise<SessionWithUsers> {
   const supabase = createClient();
   const { data, error } = await supabase
     .from("sessions")
@@ -27,7 +25,7 @@ async function fetchSession(
     .eq("party_code", partyCode.toUpperCase())
     .single();
 
-  if (error) throw new Error("Could not fetch session details.");
+  if (error || !data) throw new Error("Could not fetch session details.");
   return data;
 }
 
