@@ -12,15 +12,17 @@ const openai = new OpenAI({
 });
 
 // Prompt template for clean AI recommendations
-const CONVERSATIONAL_PROMPT = `You are a movie recommendation expert. Generate a compelling 2-3 sentence explanation for why this movie matches the group's preferences.
+const CONVERSATIONAL_PROMPT = `You are a movie pitch writer for a group recommendation app.
 
 Movie: {movie_title}
 Description: {movie_description}
-Group preferences: {group_text}
+Group mood & preferences: {group_text}
 
-Write a natural, engaging explanation. Be specific about how the movie matches their preferences. Do not use quotation marks, greetings, or meta-commentary. Start directly with the explanation.
-
-Explanation:`;
+Write exactly 2 punchy sentences (max 40 words total) explaining why this movie suits the group tonight.
+- Speak to the group as "you" — never name individuals.
+- Lead with the strongest match (mood or genre), then add one specific detail.
+- Active voice. No hedging, no filler, no quotation marks.
+`;
 
 interface GroupPreferences {
   [userName: string]: {
@@ -37,11 +39,9 @@ interface MovieData {
   [key: string]: any;
 }
 
-function formatGroupPreferences(
-  groupPreferences: GroupPreferences
-): string {
+function formatGroupPreferences(groupPreferences: GroupPreferences): string {
   const groupSummary: string[] = [];
-  
+
   for (const [user, answers] of Object.entries(groupPreferences)) {
     const userPrefs = Object.entries(answers)
       .map(([q, a]) => {
@@ -49,10 +49,10 @@ function formatGroupPreferences(
         return `${questionPart}: ${a.toLowerCase()}`;
       })
       .join(", ");
-    
+
     groupSummary.push(`${user} (${userPrefs})`);
   }
-  
+
   return groupSummary.join("; ");
 }
 
@@ -61,21 +61,21 @@ async function getEmbedding(text: string): Promise<number[]> {
     input: text,
     model: "text-embedding-3-small",
   });
-  
+
   return response.data[0].embedding;
 }
 
 async function searchMoviesForGroup(
   groupPreferences: GroupPreferences,
   threshold: number = 0.7,
-  count: number = 3
+  count: number = 3,
 ): Promise<MovieData[]> {
   const queries = Object.values(groupPreferences).map((answers) =>
-    Object.values(answers).join(". ")
+    Object.values(answers).join(". "),
   );
 
   const queryEmbeddings = await Promise.all(
-    queries.map((query) => getEmbedding(query))
+    queries.map((query) => getEmbedding(query)),
   );
 
   // Calculate average embedding
@@ -99,7 +99,7 @@ async function searchMoviesForGroup(
       query_embedding: avgEmbedding,
       similarity_threshold: threshold,
       match_count: count,
-    }
+    },
   );
 
   if (matchError || !matchData || !Array.isArray(matchData)) {
@@ -149,11 +149,10 @@ async function searchMoviesForGroup(
 
 async function generateExplanation(
   movieData: MovieData,
-  groupPreferences: GroupPreferences
+  groupPreferences: GroupPreferences,
 ): Promise<string> {
   const movieTitle = movieData.title || "this movie";
-  const movieDescription =
-    movieData.description || movieData.content || "";
+  const movieDescription = movieData.description || movieData.content || "";
   const groupText = formatGroupPreferences(groupPreferences);
 
   const prompt = CONVERSATIONAL_PROMPT.replace("{movie_title}", movieTitle)
@@ -161,7 +160,7 @@ async function generateExplanation(
     .replace("{group_text}", groupText);
 
   const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-4o",
     messages: [{ role: "user", content: prompt }],
     temperature: 0.7,
     max_tokens: 150,
@@ -178,11 +177,9 @@ export async function POST(req: Request) {
     if (!preferences || typeof preferences !== "object") {
       return NextResponse.json(
         { error: "Invalid preferences format" },
-        { status: 400 }
+        { status: 400 },
       );
     }
-
-  
 
     // Search for movies
     const results = await searchMoviesForGroup(preferences, 0, 3);
@@ -199,8 +196,10 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Error in recommend endpoint:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
-      { status: 500 }
+      {
+        error: error instanceof Error ? error.message : "Internal server error",
+      },
+      { status: 500 },
     );
   }
 }
