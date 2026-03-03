@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -43,7 +43,10 @@ export function PartyLobby({ initialSession }: PartyLobbyProps) {
     refetchInterval: 5000,
   });
 
-  const shareLink = `${window.location.origin}/join-party?code=${partyCode}`;
+  const [shareLink, setShareLink] = useState("");
+  useEffect(() => {
+    setShareLink(`${window.location.origin}/join-party?code=${partyCode}`);
+  }, [partyCode]);
 
   const handleCopyLink = async () => {
     try {
